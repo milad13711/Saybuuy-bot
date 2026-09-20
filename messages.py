@@ -22,11 +22,12 @@
 """
 
 LANDING_URL = "https://shop.saybuuy.com/offers/w1-ultra-mini"
+LICENSE_TRACKING_CODE = "I165822"
 
 PRODUCT_NAME = "ساعت هوشمند W1 Ultra Mini"
 PRICE_DISCOUNTED = "۳,۴۹۷,۰۰۰"
-PRICE_ORIGINAL = "۵,۰۰۰,۰۰۰"
-DISCOUNT_PERCENT = "۳۰٪"
+PRICE_ORIGINAL = "۶,۰۰۰,۰۰۰"
+DISCOUNT_PERCENT = "۴۲٪"  # (۶,۰۰۰,۰۰۰ - ۳,۴۹۷,۰۰۰) / ۶,۰۰۰,۰۰۰ ≈ ۴۲٪
 
 # ---------------------------------------------------------------------------
 # پیام خوش‌آمد / استارت
@@ -52,7 +53,7 @@ WELCOME = f"""⌚️ سلام! خوش اومدی به Saybuuy 🎉
 👇 با یک کلیک، مستقیم برو صفحه‌ی خرید و ثبت سفارش کن:"""
 
 # دکمه‌های زیر پیام خوش‌آمد
-BTN_BUY = "🛒 خرید فوری با ۳۰٪ تخفیف"
+BTN_BUY = f"🛒 خرید فوری با {DISCOUNT_PERCENT} تخفیف"
 BTN_FEATURES = "✨ ویژگی‌های ساعت"
 BTN_WHY = "❓ چرا همین الان بخرم؟"
 BTN_PRICE = "💰 قیمت و تخفیف"
@@ -105,7 +106,18 @@ BUY_FOLLOWUP = f"""🛍 عالیه! صفحه‌ی خرید *{PRODUCT_NAME}* بر
 
 ⏳ یادت باشه این قیمت ( {PRICE_DISCOUNTED} تومان ) فقط تا پایان آفر معتبره. ثبت سفارشت رو کامل کن تا از تخفیف جا نمونی 🎉"""
 
-COMMAND_HELP = """دستورات قابل استفاده:
+COMMAND_HELP = f"""دستورات قابل استفاده:
 /start – نمایش پیشنهاد ویژه و شروع دوباره
 /price – مشاهده‌ی قیمت و تخفیف
-/buy – دریافت لینک خرید مستقیم"""
+/buy – دریافت لینک خرید مستقیم
+/about – اطلاعات فروشگاه و کد پیگیری مجوز
+
+🔖 کد پیگیری مجوز: {LICENSE_TRACKING_CODE}"""
+
+# پیام دستور /about
+ABOUT_INFO = f"""🏪 Saybuuy — چند قدم جلوتر
+
+فروش {PRODUCT_NAME} و محصولات دیگه از طریق:
+{LANDING_URL}
+
+🔖 کد پیگیری مجوز: {LICENSE_TRACKING_CODE}"""

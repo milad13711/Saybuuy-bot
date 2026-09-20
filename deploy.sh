@@ -4,13 +4,19 @@
 # =============================================================================
 # نحوه‌ی استفاده روی سرور (اوبونتو/دبیان، با دسترسی sudo):
 #   1) این فایل رو روی سرور آپلود کن (مثلاً با scp یا از طریق پنل هاست)
+#      یا مستقیم دانلودش کن:
+#      curl -fsSL https://raw.githubusercontent.com/milad13711/Saybuuy-bot/main/deploy.sh -o deploy.sh
 #   2) اجرا کن:  sudo bash deploy.sh
-#   3) توکن بات رو وقتی ازت پرسید وارد کن (یا از پیش در متغیر محیطی
-#      BALE_BOT_TOKEN بذار)
+#   3) اگه اولین باره، توکن بات رو وقتی ازت پرسید وارد کن (یا از پیش در
+#      متغیر محیطی BALE_BOT_TOKEN بذار). اگه قبلاً یک بار اجرا کرده باشی،
+#      این اسکریپت خودکار از توکن قبلی (که در .env ذخیره شده) استفاده
+#      می‌کنه و دیگه چیزی ازت نمی‌پرسه — یعنی برای هر آپدیت کد، فقط کافیه
+#      همین دو خط بالا رو دوباره اجرا کنی.
 #
 # این اسکریپت:
 #   - پایتون/pip (در صورت نبود) رو نصب می‌کنه
-#   - پروژه رو در /opt/saybuuy-bale-bot می‌سازه
+#   - پروژه رو در /opt/saybuuy-bale-bot می‌سازه (و در اجراهای بعدی، فقط
+#     کد رو آپدیت می‌کنه)
 #   - یک virtualenv جدا و پکیج‌های لازم رو نصب می‌کنه
 #   - یک systemd service می‌سازه تا بات ۲۴ساعته اجرا بشه و با ری‌استارت
 #     سرور هم خودکار بالا بیاد (بدون نیاز به نگه داشتن ترمینال باز)
@@ -30,7 +36,7 @@ elif ! python3 -m venv --help &>/dev/null; then
   apt-get install -y python3-venv
 fi
 
-echo "== ساخت پوشه‌ی پروژه در $APP_DIR =="
+echo "== ساخت/آپدیت پوشه‌ی پروژه در $APP_DIR =="
 mkdir -p "$APP_DIR"
 
 cat > "$APP_DIR/bot.py" <<'BOT_PY_EOF'
@@ -156,6 +162,8 @@ def handle_command(chat_id, text):
         send_message(chat_id, msg.BUY_FOLLOWUP, back_keyboard())
     elif command == "/help":
         send_message(chat_id, msg.COMMAND_HELP, main_keyboard())
+    elif command == "/about":
+        send_message(chat_id, msg.ABOUT_INFO, main_keyboard())
     else:
         send_message(chat_id, msg.FALLBACK, main_keyboard())
 
@@ -345,11 +353,12 @@ cat > "$APP_DIR/messages.py" <<'MESSAGES_PY_EOF'
 """
 
 LANDING_URL = "https://shop.saybuuy.com/offers/w1-ultra-mini"
+LICENSE_TRACKING_CODE = "I165822"
 
 PRODUCT_NAME = "ساعت هوشمند W1 Ultra Mini"
 PRICE_DISCOUNTED = "۳,۴۹۷,۰۰۰"
-PRICE_ORIGINAL = "۵,۰۰۰,۰۰۰"
-DISCOUNT_PERCENT = "۳۰٪"
+PRICE_ORIGINAL = "۶,۰۰۰,۰۰۰"
+DISCOUNT_PERCENT = "۴۲٪"  # (۶,۰۰۰,۰۰۰ - ۳,۴۹۷,۰۰۰) / ۶,۰۰۰,۰۰۰ ≈ ۴۲٪
 
 # ---------------------------------------------------------------------------
 # پیام خوش‌آمد / استارت
@@ -375,7 +384,7 @@ WELCOME = f"""⌚️ سلام! خوش اومدی به Saybuuy 🎉
 👇 با یک کلیک، مستقیم برو صفحه‌ی خرید و ثبت سفارش کن:"""
 
 # دکمه‌های زیر پیام خوش‌آمد
-BTN_BUY = "🛒 خرید فوری با ۳۰٪ تخفیف"
+BTN_BUY = f"🛒 خرید فوری با {DISCOUNT_PERCENT} تخفیف"
 BTN_FEATURES = "✨ ویژگی‌های ساعت"
 BTN_WHY = "❓ چرا همین الان بخرم؟"
 BTN_PRICE = "💰 قیمت و تخفیف"
@@ -428,10 +437,21 @@ BUY_FOLLOWUP = f"""🛍 عالیه! صفحه‌ی خرید *{PRODUCT_NAME}* بر
 
 ⏳ یادت باشه این قیمت ( {PRICE_DISCOUNTED} تومان ) فقط تا پایان آفر معتبره. ثبت سفارشت رو کامل کن تا از تخفیف جا نمونی 🎉"""
 
-COMMAND_HELP = """دستورات قابل استفاده:
+COMMAND_HELP = f"""دستورات قابل استفاده:
 /start – نمایش پیشنهاد ویژه و شروع دوباره
 /price – مشاهده‌ی قیمت و تخفیف
-/buy – دریافت لینک خرید مستقیم"""
+/buy – دریافت لینک خرید مستقیم
+/about – اطلاعات فروشگاه و کد پیگیری مجوز
+
+🔖 کد پیگیری مجوز: {LICENSE_TRACKING_CODE}"""
+
+# پیام دستور /about
+ABOUT_INFO = f"""🏪 Saybuuy — چند قدم جلوتر
+
+فروش {PRODUCT_NAME} و محصولات دیگه از طریق:
+{LANDING_URL}
+
+🔖 کد پیگیری مجوز: {LICENSE_TRACKING_CODE}"""
 
 MESSAGES_PY_EOF
 
@@ -441,10 +461,15 @@ python-dotenv>=1.0.0
 
 REQ_EOF
 
-if [ -z "${BALE_BOT_TOKEN:-}" ]; then
+# اگه از قبل .env با توکن معتبر داریم، دوباره چیزی نمی‌پرسیم (برای آپدیت‌های بعدی)
+if [ -f "$APP_DIR/.env" ] && grep -q '^BALE_BOT_TOKEN=' "$APP_DIR/.env" 2>/dev/null; then
+  echo "== توکن از قبل موجوده؛ استفاده از همون =="
+elif [ -n "${BALE_BOT_TOKEN:-}" ]; then
+  echo "BALE_BOT_TOKEN=$BALE_BOT_TOKEN" > "$APP_DIR/.env"
+else
   read -rp "توکن بات بله رو وارد کن (فرمت 123456:abcDEF...): " BALE_BOT_TOKEN
+  echo "BALE_BOT_TOKEN=$BALE_BOT_TOKEN" > "$APP_DIR/.env"
 fi
-echo "BALE_BOT_TOKEN=$BALE_BOT_TOKEN" > "$APP_DIR/.env"
 
 echo "== ساخت virtualenv و نصب پکیج‌ها =="
 python3 -m venv "$APP_DIR/venv"
@@ -453,7 +478,7 @@ python3 -m venv "$APP_DIR/venv"
 
 chown -R "$RUN_USER":"$RUN_USER" "$APP_DIR"
 
-echo "== ساخت systemd service =="
+echo "== ساخت/آپدیت systemd service =="
 cat > "/etc/systemd/system/${SERVICE_NAME}.service" <<SERVICE_EOF
 [Unit]
 Description=Saybuuy Bale Bot (W1 Ultra Mini)
@@ -477,7 +502,7 @@ systemctl enable "$SERVICE_NAME"
 systemctl restart "$SERVICE_NAME"
 
 echo ""
-echo "✅ بات نصب و اجرا شد و به‌صورت ۲۴ساعته (با ری‌استارت خودکار) در حال کاره."
+echo "✅ بات نصب/آپدیت و اجرا شد و به‌صورت ۲۴ساعته (با ری‌استارت خودکار) در حال کاره."
 echo ""
 echo "دستورات مفید:"
 echo "  وضعیت:      systemctl status $SERVICE_NAME"

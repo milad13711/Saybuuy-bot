@@ -120,6 +120,8 @@ def handle_command(chat_id, text):
         send_message(chat_id, msg.BUY_FOLLOWUP, back_keyboard())
     elif command == "/help":
         send_message(chat_id, msg.COMMAND_HELP, main_keyboard())
+    elif command == "/about":
+        send_message(chat_id, msg.ABOUT_INFO, main_keyboard())
     else:
         send_message(chat_id, msg.FALLBACK, main_keyboard())
 
